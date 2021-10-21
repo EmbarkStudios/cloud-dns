@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{DNSClient, Result};
 
+use super::ListEnvelope;
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct DNSKey {
@@ -22,7 +24,7 @@ pub struct DNSKey {
 #[serde(rename_all = "camelCase")]
 enum KeyType {
     KeySigning,
-    ZoneSigning
+    ZoneSigning,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -32,7 +34,7 @@ enum Algorithm {
     Ecdsap384sha384,
     Rsasha1,
     Rsasha256,
-    Rsasha512
+    Rsasha512,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -52,17 +54,10 @@ enum DigestType {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct DNSKeysListResponse {
-    kind: String, // "dns#dnsKeysListResponse"
-    header: Option<Header>,
+pub struct DNSKeys {
+    #[serde(flatten)]
+    envelope: ListEnvelope,
     dns_keys: Vec<DNSKey>,
-    next_page_token: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct Header {
-    operation_id: String,
 }
 
 pub struct DNSKeysHandler<'client> {
@@ -74,7 +69,7 @@ impl<'client> DNSKeysHandler<'client> {
         Self { client }
     }
 
-    pub async fn list(&self, managed_zone: String) -> Result<DNSKeysListResponse> {
+    pub async fn list(&self, managed_zone: String) -> Result<DNSKeys> {
         let route = format!(
             "managedZones/{managed_zone}/dnsKeys",
             managed_zone = managed_zone,

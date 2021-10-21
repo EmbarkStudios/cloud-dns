@@ -2,7 +2,11 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+use crate::{DNSClient, Result};
+
+use super::{managed_zone_operations::ManagedZoneOperation, ListEnvelope};
+
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub struct ManagedZone {
     kind: String, // "dns#managedZone"
@@ -23,14 +27,14 @@ pub struct ManagedZone {
     service_directory_config: ServiceDirectoryConfig,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 struct ServiceDirectoryConfig {
     kind: String, // "dns#managedZoneServiceDirectoryConfig"
     namespace: ServiceDirectoryConfigNamespace,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 struct ServiceDirectoryConfigNamespace {
     kind: String, // "dns#managedZoneServiceDirectoryConfigNamespace"
@@ -38,20 +42,20 @@ struct ServiceDirectoryConfigNamespace {
     deletion_time: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct ReverseLookupConfig {
     kind: String, // "dns#managedZoneReverseLookupConfig"
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct PeeringConfig {
     kind: String, // "dns#managedZonePeeringConfig"
     target_network: PeeringConfigTargetNetwork,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct PeeringConfigTargetNetwork {
     kind: String, // "dns#managedZonePeeringConfigTargetNetwork"
@@ -59,21 +63,21 @@ struct PeeringConfigTargetNetwork {
     deactivate_time: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct PrivateVisibilityConfig {
     kind: String, // "dns#managedZonePrivateVisibilityConfig"
     networks: Vec<PrivateVisibilityConfigNetwork>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct ForwardingConfig {
     kind: String, // "dns#managedZoneForwardingConfig"
     target_name_servers: Vec<ForwardingConfigNameServerTarget>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct ForwardingConfigNameServerTarget {
     kind: String, // "dns#managedZoneForwardingConfigNameServerTarget"
@@ -81,14 +85,14 @@ struct ForwardingConfigNameServerTarget {
     forwarding_path: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct PrivateVisibilityConfigNetwork {
     kind: String, // "dns#managedZonePrivateVisibilityConfigNetwork"
     network_url: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct DNSSecConfig {
     kind: String, // "dns#managedZoneDnsSecConfig"
@@ -97,11 +101,78 @@ struct DNSSecConfig {
     non_existence: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct DefaultKeySpec {
     kind: String, // "dns#dnsKeySpec"
     key_type: String,
     algorithm: String,
     key_length: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ManagedZones {
+    #[serde(flatten)]
+    envelope: ListEnvelope,
+    managed_zones: Vec<ManagedZone>,
+}
+
+pub struct ManagedZonesHandler<'client> {
+    client: &'client DNSClient,
+}
+
+impl<'client> ManagedZonesHandler<'client> {
+    pub(crate) fn new(client: &'client DNSClient) -> Self {
+        Self { client }
+    }
+
+    pub async fn list(&self) -> Result<ManagedZones> {
+        let route = "managedZones".to_string();
+
+        self.client.get(route, None::<&()>).await
+    }
+
+    pub async fn get(&self, managed_zone: String) -> Result<ManagedZone> {
+        let route = format!("managedZones/{managed_zone}", managed_zone = managed_zone,);
+
+        self.client.get(route, None::<&()>).await
+    }
+
+    pub async fn patch(
+        &self,
+        managed_zone_id: String,
+        managed_zone: ManagedZone,
+    ) -> Result<ManagedZoneOperation> {
+        let route = format!(
+            "managedZones/{managed_zone_id}",
+            managed_zone_id = managed_zone_id,
+        );
+        self.client.patch(route, Some(&managed_zone)).await
+    }
+
+    pub async fn create(&self, managed_zone: ManagedZone) -> Result<ManagedZone> {
+        let route = "managedZones".to_string();
+
+        self.client.post(route, Some(&managed_zone)).await
+    }
+
+    pub async fn delete(&self, managed_zone: String) -> Result<()> {
+        let route = format!("managedZones/{managed_zone}", managed_zone = managed_zone,);
+
+        self.client.delete(route, None::<&()>).await
+    }
+
+    pub async fn update(
+        &self,
+        managed_zone_id: String,
+        managed_zone: ManagedZone,
+    ) -> Result<ManagedZoneOperation> {
+        let route = format!(
+            "managedZones/{managed_zone_id}",
+            managed_zone_id = managed_zone_id,
+        );
+
+        self.client.put(route, Some(&managed_zone)).await
+    }
 }

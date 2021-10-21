@@ -1,7 +1,10 @@
 use from_response::FromResponse;
-use reqwest::{Url};
+use reqwest::Url;
 use serde::Serialize;
-use tame_oauth::{Token, gcp::{TokenOrRequest, TokenProvider, TokenProviderWrapper}};
+use tame_oauth::{
+    gcp::{TokenOrRequest, TokenProvider, TokenProviderWrapper},
+    Token,
+};
 
 mod api;
 mod error;
@@ -38,13 +41,23 @@ impl DNSClient {
         api::dns_keys::DNSKeysHandler::new(self)
     }
 
-    pub fn managed_zone_operations(&self) {}
+    pub fn managed_zone_operations(
+        &self,
+    ) -> api::managed_zone_operations::ManagedZoneOperationsHandler {
+        api::managed_zone_operations::ManagedZoneOperationsHandler::new(self)
+    }
 
-    pub fn managed_zones(&self) {}
+    pub fn managed_zones(&self) -> api::managed_zones::ManagedZonesHandler {
+        api::managed_zones::ManagedZonesHandler::new(self)
+    }
 
-    pub fn policies(&self) {}
+    pub fn policies(&self) -> api::policies::PoliciesHandler {
+        api::policies::PoliciesHandler::new(self)
+    }
 
-    pub fn projects(&self) {}
+    pub fn projects(&self) -> api::projects::ProjectsHandler {
+        api::projects::ProjectsHandler::new(self)
+    }
 
     pub fn resource_record_sets(&self) -> api::resource_record_sets::ResourceRecordSetsHandler {
         api::resource_record_sets::ResourceRecordSetsHandler::new(self)
@@ -63,7 +76,9 @@ impl DNSClient {
         route: impl AsRef<str>,
         body: Option<&P>,
     ) -> Result<R> {
-        let mut request = self.request_builder(self.absolute_url(route)?, reqwest::Method::POST).await?;
+        let mut request = self
+            .request_builder(self.absolute_url(route)?, reqwest::Method::POST)
+            .await?;
 
         if let Some(body) = body {
             request = request.json(body);
@@ -79,7 +94,9 @@ impl DNSClient {
         P: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self.request_builder(self.absolute_url(route)?, reqwest::Method::GET).await?;
+        let mut request = self
+            .request_builder(self.absolute_url(route)?, reqwest::Method::GET)
+            .await?;
 
         if let Some(parameters) = parameters {
             request = request.query(parameters);
@@ -96,7 +113,9 @@ impl DNSClient {
         B: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self.request_builder(self.absolute_url(route)?, reqwest::Method::PATCH).await?;
+        let mut request = self
+            .request_builder(self.absolute_url(route)?, reqwest::Method::PATCH)
+            .await?;
 
         if let Some(body) = body {
             request = request.json(body);
@@ -112,7 +131,9 @@ impl DNSClient {
         B: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self.request_builder(self.absolute_url(route)?, reqwest::Method::PUT).await?;
+        let mut request = self
+            .request_builder(self.absolute_url(route)?, reqwest::Method::PUT)
+            .await?;
 
         if let Some(body) = body {
             request = request.json(body);
@@ -128,7 +149,9 @@ impl DNSClient {
         P: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self.request_builder(self.absolute_url(route)?, reqwest::Method::DELETE).await?;
+        let mut request = self
+            .request_builder(self.absolute_url(route)?, reqwest::Method::DELETE)
+            .await?;
 
         if let Some(parameters) = parameters {
             request = request.query(parameters);
@@ -144,8 +167,11 @@ impl DNSClient {
         method: reqwest::Method,
     ) -> Result<reqwest::RequestBuilder> {
         match self.fetch_token().await {
-            Ok(token) => { Ok(self.client.request(method, url).bearer_auth(token.access_token)) },
-            Err(e) => {Err(e)},
+            Ok(token) => Ok(self
+                .client
+                .request(method, url)
+                .bearer_auth(token.access_token)),
+            Err(e) => Err(e),
         }
     }
 
@@ -157,8 +183,8 @@ impl DNSClient {
 impl DNSClient {
     async fn fetch_token(&self) -> Result<Token> {
         let provider = TokenProviderWrapper::get_default_provider()
-        .expect("unable to read default token provider")
-        .expect("unable to find default token provider");
+            .expect("unable to read default token provider")
+            .expect("unable to find default token provider");
 
         match provider.get_token(&scopes()).unwrap() {
             TokenOrRequest::Request {
@@ -167,22 +193,22 @@ impl DNSClient {
                 ..
             } => {
                 let client = reqwest::Client::new();
-    
+
                 let (parts, body) = request.into_parts();
                 let uri = parts.uri.to_string();
-    
+
                 let builder = match parts.method {
                     http::Method::POST => client.post(&uri),
                     method => unimplemented!("{} not implemented", method),
                 };
-    
+
                 let request = builder.headers(parts.headers).body(body).build().unwrap();
                 let response = client.execute(request).await.unwrap();
-    
+
                 let mut builder = http::Response::builder()
                     .status(response.status())
                     .version(response.version());
-    
+
                 let headers = builder.headers_mut().unwrap();
                 headers.extend(
                     response
@@ -190,12 +216,14 @@ impl DNSClient {
                         .into_iter()
                         .map(|(k, v)| (k.clone(), v.clone())),
                 );
-    
+
                 let buffer = response.bytes().await.unwrap();
                 let response = builder.body(buffer).unwrap();
-    
-                provider.parse_token_response(scope_hash, response).map_err(error::DNSError::Auth)
-            },
+
+                provider
+                    .parse_token_response(scope_hash, response)
+                    .map_err(error::DNSError::Auth)
+            }
             _ => unreachable!(),
         }
     }
@@ -205,7 +233,9 @@ pub async fn map_dns_error(response: reqwest::Response) -> Result<reqwest::Respo
     if response.status().is_success() {
         Ok(response)
     } else {
-        Err(error::DNSError::Http(response.error_for_status().unwrap_err()))
+        Err(error::DNSError::Http(
+            response.error_for_status().unwrap_err(),
+        ))
     }
 }
 

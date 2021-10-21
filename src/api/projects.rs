@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use crate::{DNSClient, Result};
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-struct Project {
+pub struct Project {
     kind: String, // "dns#project"
     number: u64,
     id: String,
@@ -36,4 +38,18 @@ struct WhitelistedKeySpec {
     key_type: String,
     algorithm: String,
     key_length: u64,
+}
+
+pub struct ProjectsHandler<'client> {
+    client: &'client DNSClient,
+}
+
+impl<'client> ProjectsHandler<'client> {
+    pub(crate) fn new(client: &'client DNSClient) -> Self {
+        Self { client }
+    }
+
+    pub async fn get(&self) -> Result<Project> {
+        self.client.get("/", None::<&()>).await
+    }
 }
