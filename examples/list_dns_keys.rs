@@ -4,9 +4,9 @@ async fn main() -> cloud_dns::Result<()> {
     let managed_zone =
         std::env::var("MANAGED_ZONE").expect("MANAGED_ZONE env variable is required");
 
-    let response = cloud_dns::DNSClient::new(project_id)?
+    let response = cloud_dns::DnsClient::new(project_id.as_str())?
         .dns_keys()
-        .list(managed_zone)
+        .list(managed_zone.as_str())
         .await?;
 
     println!("{:#?}", response);

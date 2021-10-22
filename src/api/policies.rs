@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 use super::{ListEnvelope, UpdateEnvelope};
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct Policy {
     kind: String, // "dns#policy"
     id: u64,
@@ -18,21 +18,21 @@ pub struct Policy {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct PolicyNetwork {
     kind: String, // "dns#policyNetwork"
     network_url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct AlternativeNameServerConfig {
     kind: String, // "dns#policyAlternativeNameServerConfig"
     target_name_servers: Vec<AlternativeNameServerConfigTargetNameServers>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct AlternativeNameServerConfigTargetNameServers {
     kind: String, // "dns#policyAlternativeNameServerConfigTargetNameServer"
     ipv4_address: String,
@@ -56,11 +56,11 @@ pub struct UpdatePolicy {
 }
 
 pub struct PoliciesHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> PoliciesHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
@@ -70,13 +70,13 @@ impl<'client> PoliciesHandler<'client> {
         self.client.get(route, None::<&()>).await
     }
 
-    pub async fn get(&self, policy: String) -> Result<Policy> {
+    pub async fn get(&self, policy: &str) -> Result<Policy> {
         let route = format!("policies/{policy}", policy = policy,);
 
         self.client.get(route, None::<&()>).await
     }
 
-    pub async fn patch(&self, policy_id: String, policy: Policy) -> Result<Policy> {
+    pub async fn patch(&self, policy_id: &str, policy: Policy) -> Result<Policy> {
         let route = format!("policies/{policy_id}", policy_id = policy_id,);
 
         self.client.patch(route, Some(&policy)).await
@@ -88,13 +88,13 @@ impl<'client> PoliciesHandler<'client> {
         self.client.post(route, Some(&policy)).await
     }
 
-    pub async fn delete(&self, policy_id: String) -> Result<()> {
+    pub async fn delete(&self, policy_id: &str) -> Result<()> {
         let route = format!("policies/{policy_id}", policy_id = policy_id,);
 
         self.client.delete(route, None::<&()>).await
     }
 
-    pub async fn update(&self, policy_id: String, policy: Policy) -> Result<UpdatePolicy> {
+    pub async fn update(&self, policy_id: &str, policy: Policy) -> Result<UpdatePolicy> {
         let route = format!("policies/{policy_id}", policy_id = policy_id,);
 
         self.client.put(route, Some(&policy)).await

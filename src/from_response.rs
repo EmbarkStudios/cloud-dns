@@ -10,6 +10,6 @@ impl<T: serde::de::DeserializeOwned> FromResponse for T {
         let text = response.text().await?;
 
         let de = &mut serde_json::Deserializer::from_str(&text);
-        serde_path_to_error::deserialize(de).map_err(super::error::DNSError::Json)
+        serde_path_to_error::deserialize(de).map_err(super::error::DnsError::Json)
     }
 }

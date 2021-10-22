@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 use super::ListEnvelope;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct DNSKey {
+pub struct DnsKey {
     kind: String, // "dns#dnsKey"
     id: String,
     algorithm: Algorithm,
@@ -57,19 +57,19 @@ enum DigestType {
 pub struct DNSKeys {
     #[serde(flatten)]
     envelope: ListEnvelope,
-    dns_keys: Vec<DNSKey>,
+    dns_keys: Vec<DnsKey>,
 }
 
 pub struct DNSKeysHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> DNSKeysHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
-    pub async fn list(&self, managed_zone: String) -> Result<DNSKeys> {
+    pub async fn list(&self, managed_zone: &str) -> Result<DNSKeys> {
         let route = format!(
             "managedZones/{managed_zone}/dnsKeys",
             managed_zone = managed_zone,
@@ -78,7 +78,7 @@ impl<'client> DNSKeysHandler<'client> {
         self.client.get(route, None::<&()>).await
     }
 
-    pub async fn get(&self, managed_zone: String, dns_key_id: String) -> Result<DNSKey> {
+    pub async fn get(&self, managed_zone: &str, dns_key_id: &str) -> Result<DnsKey> {
         let route = format!(
             "managedZones/{managed_zone}/dnsKeys/{dns_key_id}",
             managed_zone = managed_zone,

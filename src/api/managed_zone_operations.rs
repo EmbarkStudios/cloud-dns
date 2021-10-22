@@ -1,11 +1,11 @@
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 use super::managed_zones::ManagedZone;
-use super::{dns_keys::DNSKey, ListEnvelope};
+use super::{dns_keys::DnsKey, ListEnvelope};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct ManagedZoneOperation {
     kind: String, // "dns#operation"
     id: String,
@@ -18,17 +18,17 @@ pub struct ManagedZoneOperation {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct ZoneContext {
     old_value: ManagedZone,
     new_value: ManagedZone,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct DNSKeyContext {
-    old_value: DNSKey,
-    new_value: DNSKey,
+    old_value: DnsKey,
+    new_value: DnsKey,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,15 +40,15 @@ pub struct ManagedZoneOperations {
 }
 
 pub struct ManagedZoneOperationsHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> ManagedZoneOperationsHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
-    pub async fn list(&self, managed_zone: String) -> Result<ManagedZoneOperations> {
+    pub async fn list(&self, managed_zone: &str) -> Result<ManagedZoneOperations> {
         let route = format!(
             "managedZones/{managed_zone}/operations",
             managed_zone = managed_zone,
@@ -59,8 +59,8 @@ impl<'client> ManagedZoneOperationsHandler<'client> {
 
     pub async fn get(
         &self,
-        managed_zone: String,
-        operation_id: String,
+        managed_zone: &str,
+        operation_id: &str,
     ) -> Result<ManagedZoneOperation> {
         let route = format!(
             "managedZones/{managed_zone}/operations/{operation_id}",

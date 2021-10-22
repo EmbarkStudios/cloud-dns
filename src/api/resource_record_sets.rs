@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 use super::ListEnvelope;
 
@@ -23,15 +23,15 @@ pub struct ResourceRecordSets {
 }
 
 pub struct ResourceRecordSetsHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> ResourceRecordSetsHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
-    pub async fn list(&self, managed_zone: String) -> Result<ResourceRecordSets> {
+    pub async fn list(&self, managed_zone: &str) -> Result<ResourceRecordSets> {
         let route = format!(
             "managedZones/{managed_zone}/rrsets",
             managed_zone = managed_zone,
@@ -42,9 +42,9 @@ impl<'client> ResourceRecordSetsHandler<'client> {
 
     pub async fn get(
         &self,
-        managed_zone: String,
-        name: String,
-        r#type: String,
+        managed_zone: &str,
+        name: &str,
+        r#type: &str,
     ) -> Result<ResourceRecordSet> {
         let route = format!(
             "managedZones/{managed_zone}/rrsets/{name}/{typ}",
@@ -58,9 +58,9 @@ impl<'client> ResourceRecordSetsHandler<'client> {
 
     pub async fn patch(
         &self,
-        managed_zone: String,
-        name: String,
-        r#type: String,
+        managed_zone: &str,
+        name: &str,
+        r#type: &str,
         record_set: ResourceRecordSet,
     ) -> Result<ResourceRecordSet> {
         let route = format!(
@@ -75,7 +75,7 @@ impl<'client> ResourceRecordSetsHandler<'client> {
 
     pub async fn create(
         &self,
-        managed_zone: String,
+        managed_zone: &str,
         record_set: ResourceRecordSet,
     ) -> Result<ResourceRecordSet> {
         let route = format!(
@@ -86,7 +86,7 @@ impl<'client> ResourceRecordSetsHandler<'client> {
         self.client.post(route, Some(&record_set)).await
     }
 
-    pub async fn delete(&self, managed_zone: String, name: String, r#type: String) -> Result<()> {
+    pub async fn delete(&self, managed_zone: &str, name: &str, r#type: &str) -> Result<()> {
         let route = format!(
             "managedZones/{managed_zone}/rrsets/{name}/{typ}",
             managed_zone = managed_zone,

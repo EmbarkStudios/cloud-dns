@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 use super::{managed_zone_operations::ManagedZoneOperation, ListEnvelope};
 
@@ -119,11 +119,11 @@ pub struct ManagedZones {
 }
 
 pub struct ManagedZonesHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> ManagedZonesHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
@@ -141,7 +141,7 @@ impl<'client> ManagedZonesHandler<'client> {
 
     pub async fn patch(
         &self,
-        managed_zone_id: String,
+        managed_zone_id: &str,
         managed_zone: ManagedZone,
     ) -> Result<ManagedZoneOperation> {
         let route = format!(
@@ -157,7 +157,7 @@ impl<'client> ManagedZonesHandler<'client> {
         self.client.post(route, Some(&managed_zone)).await
     }
 
-    pub async fn delete(&self, managed_zone: String) -> Result<()> {
+    pub async fn delete(&self, managed_zone: &str) -> Result<()> {
         let route = format!("managedZones/{managed_zone}", managed_zone = managed_zone,);
 
         self.client.delete(route, None::<&()>).await
@@ -165,7 +165,7 @@ impl<'client> ManagedZonesHandler<'client> {
 
     pub async fn update(
         &self,
-        managed_zone_id: String,
+        managed_zone_id: &str,
         managed_zone: ManagedZone,
     ) -> Result<ManagedZoneOperation> {
         let route = format!(

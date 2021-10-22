@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 use super::{resource_record_sets::ResourceRecordSet, ListEnvelope};
 
@@ -32,28 +32,28 @@ pub struct Changes {
 }
 
 pub struct ChangesHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> ChangesHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
-    pub async fn list(&self, managed_zone: String) -> Result<Changes> {
-        let route = format!("managedZones/{}/changes", managed_zone,);
+    pub async fn list(&self, managed_zone: &str) -> Result<Changes> {
+        let route = format!("managedZones/{}/changes", managed_zone);
 
         self.client.get(route, None::<&()>).await
     }
 
-    pub async fn get(&self, managed_zone: String, change_id: String) -> Result<Change> {
+    pub async fn get(&self, managed_zone: &str, change_id: &str) -> Result<Change> {
         let route = format!("managedZones/{}/changes/{}", managed_zone, change_id);
 
         self.client.get(route, None::<&()>).await
     }
 
-    pub async fn create(&self, managed_zone: String, change: Change) -> Result<Change> {
-        let route = format!("managedZones/{}/changes", managed_zone,);
+    pub async fn create(&self, managed_zone: &str, change: Change) -> Result<Change> {
+        let route = format!("managedZones/{}/changes", managed_zone);
 
         self.client.post(route, Some(&change)).await
     }

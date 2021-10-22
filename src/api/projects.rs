@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{DNSClient, Result};
+use crate::{DnsClient, Result};
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct Project {
     kind: String, // "dns#project"
     number: u64,
@@ -12,7 +12,7 @@ pub struct Project {
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct Quota {
     kind: String, // "dns#quota"
     managed_zones: i64,
@@ -32,7 +32,7 @@ struct Quota {
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 struct WhitelistedKeySpec {
     kind: String, // "dns#dnsKeySpec"
     key_type: String,
@@ -41,11 +41,11 @@ struct WhitelistedKeySpec {
 }
 
 pub struct ProjectsHandler<'client> {
-    client: &'client DNSClient,
+    client: &'client DnsClient,
 }
 
 impl<'client> ProjectsHandler<'client> {
-    pub(crate) fn new(client: &'client DNSClient) -> Self {
+    pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 

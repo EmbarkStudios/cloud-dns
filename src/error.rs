@@ -3,9 +3,9 @@ use std::fmt;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum DNSError {
+pub enum DnsError {
     #[error(transparent)]
-    Dns { source: CloudDNSError },
+    Dns { source: CloudDnsError },
     #[error(transparent)]
     Auth(#[from] tame_oauth::Error),
     #[error(transparent)]
@@ -23,12 +23,12 @@ pub enum DNSError {
 /// An error returned from Cloud DNS's API.
 #[derive(serde::Deserialize, Debug, Clone)]
 #[non_exhaustive]
-pub struct CloudDNSError {
+pub struct CloudDnsError {
     pub errors: Option<Vec<serde_json::Value>>,
     pub message: String,
 }
 
-impl fmt::Display for CloudDNSError {
+impl fmt::Display for CloudDnsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Error: {}", self.message)?;
 
@@ -36,4 +36,4 @@ impl fmt::Display for CloudDNSError {
     }
 }
 
-impl std::error::Error for CloudDNSError {}
+impl std::error::Error for CloudDnsError {}

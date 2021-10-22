@@ -10,25 +10,25 @@ mod api;
 mod error;
 mod from_response;
 
-pub type Result<T, E = error::DNSError> = std::result::Result<T, E>;
+pub type Result<T, E = error::DnsError> = std::result::Result<T, E>;
 
 /// The Cloud DNS API client.
 #[derive(Debug, Clone)]
-pub struct DNSClient {
+pub struct DnsClient {
     client: reqwest::Client,
     pub base_url: Url,
     project_id: String,
 }
 
-impl DNSClient {
-    pub fn new(project_id: String) -> Result<DNSClient> {
+impl DnsClient {
+    pub fn new(project_id: &str) -> Result<DnsClient> {
         let client = reqwest::Client::builder()
             .build()
-            .map_err(error::DNSError::Http)?;
+            .map_err(error::DnsError::Http)?;
 
-        Ok(DNSClient {
+        Ok(DnsClient {
             client,
-            project_id: project_id.clone(),
+            project_id: project_id.to_string(),
             base_url: Url::parse(&base_url(project_id)).unwrap(),
         })
     }
@@ -64,11 +64,11 @@ impl DNSClient {
     }
 }
 
-impl DNSClient {
+impl DnsClient {
     pub fn absolute_url(&self, url: impl AsRef<str>) -> Result<Url> {
         self.base_url
             .join(url.as_ref())
-            .map_err(error::DNSError::Url)
+            .map_err(error::DnsError::Url)
     }
 
     pub async fn post<P: Serialize + ?Sized, R: FromResponse>(
@@ -103,7 +103,6 @@ impl DNSClient {
         }
 
         let response = self.execute(request).await?;
-        println!("{:#?}", response);
         R::from_response(map_dns_error(response).await?).await
     }
 
@@ -176,17 +175,17 @@ impl DNSClient {
     }
 
     pub async fn execute(&self, request: reqwest::RequestBuilder) -> Result<reqwest::Response> {
-        request.send().await.map_err(error::DNSError::Http)
+        request.send().await.map_err(error::DnsError::Http)
     }
 }
 
-impl DNSClient {
+impl DnsClient {
     async fn fetch_token(&self) -> Result<Token> {
         let provider = TokenProviderWrapper::get_default_provider()
             .expect("unable to read default token provider")
             .expect("unable to find default token provider");
 
-        match provider.get_token(&scopes()).unwrap() {
+        match provider.get_token(scopes()).unwrap() {
             TokenOrRequest::Request {
                 request,
                 scope_hash,
@@ -222,7 +221,7 @@ impl DNSClient {
 
                 provider
                     .parse_token_response(scope_hash, response)
-                    .map_err(error::DNSError::Auth)
+                    .map_err(error::DnsError::Auth)
             }
             _ => unreachable!(),
         }
@@ -233,16 +232,16 @@ pub async fn map_dns_error(response: reqwest::Response) -> Result<reqwest::Respo
     if response.status().is_success() {
         Ok(response)
     } else {
-        Err(error::DNSError::Http(
+        Err(error::DnsError::Http(
             response.error_for_status().unwrap_err(),
         ))
     }
 }
 
-fn base_url(project_id: String) -> String {
+fn base_url(project_id: &str) -> String {
     format!("https://dns.googleapis.com/dns/v1/projects/{}/", project_id)
 }
 
-fn scopes() -> Vec<String> {
-    vec!["https://www.googleapis.com/auth/ndev.clouddns.readwrite".to_string()]
+fn scopes() -> &'static [&'static str] {
+    &["https://www.googleapis.com/auth/ndev.clouddns.readwrite"]
 }
