@@ -37,8 +37,8 @@ impl DnsClient {
         api::changes::ChangesHandler::new(self)
     }
 
-    pub fn dns_keys(&self) -> api::dns_keys::DNSKeysHandler {
-        api::dns_keys::DNSKeysHandler::new(self)
+    pub fn dns_keys(&self) -> api::dns_keys::DnsKeysHandler {
+        api::dns_keys::DnsKeysHandler::new(self)
     }
 
     pub fn managed_zone_operations(

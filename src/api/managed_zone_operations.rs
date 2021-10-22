@@ -14,7 +14,7 @@ pub struct ManagedZoneOperation {
     user: String,
     r#type: String,
     zone_context: ZoneContext,
-    dns_key_context: DNSKeyContext,
+    dns_key_context: DnsKeyContext,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -26,7 +26,7 @@ struct ZoneContext {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct DNSKeyContext {
+struct DnsKeyContext {
     old_value: DnsKey,
     new_value: DnsKey,
 }

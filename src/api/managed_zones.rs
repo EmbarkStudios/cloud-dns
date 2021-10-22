@@ -16,7 +16,7 @@ pub struct ManagedZone {
     id: u64,
     name_servers: Vec<String>,
     creation_time: String,
-    dnssec_config: DNSSecConfig,
+    dnssec_config: DnsSecConfig,
     name_server_set: String,
     visibility: String,
     private_visibility_config: PrivateVisibilityConfig,
@@ -94,7 +94,7 @@ struct PrivateVisibilityConfigNetwork {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct DNSSecConfig {
+struct DnsSecConfig {
     kind: String, // "dns#managedZoneDnsSecConfig"
     state: String,
     default_key_specs: Vec<DefaultKeySpec>,

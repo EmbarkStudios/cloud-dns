@@ -54,22 +54,22 @@ enum DigestType {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct DNSKeys {
+pub struct DnsKeys {
     #[serde(flatten)]
     envelope: ListEnvelope,
     dns_keys: Vec<DnsKey>,
 }
 
-pub struct DNSKeysHandler<'client> {
+pub struct DnsKeysHandler<'client> {
     client: &'client DnsClient,
 }
 
-impl<'client> DNSKeysHandler<'client> {
+impl<'client> DnsKeysHandler<'client> {
     pub(crate) fn new(client: &'client DnsClient) -> Self {
         Self { client }
     }
 
-    pub async fn list(&self, managed_zone: &str) -> Result<DNSKeys> {
+    pub async fn list(&self, managed_zone: &str) -> Result<DnsKeys> {
         let route = format!(
             "managedZones/{managed_zone}/dnsKeys",
             managed_zone = managed_zone,
