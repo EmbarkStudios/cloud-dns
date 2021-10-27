@@ -4,8 +4,8 @@ async fn main() -> cloud_dns::Result<()> {
     let managed_zone =
         std::env::var("MANAGED_ZONE").expect("MANAGED_ZONE env variable is required");
 
-    let service =
-        tower::ServiceBuilder::new().service(hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()));
+    let service = tower::ServiceBuilder::new()
+        .service(hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()));
 
     let response = cloud_dns::DnsClient::new(service, project_id.as_str())
         .changes()
