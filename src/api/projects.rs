@@ -50,6 +50,6 @@ impl<'client> ProjectsHandler<'client> {
     }
 
     pub async fn get(&self) -> Result<Project> {
-        self.client.get("/", None::<&()>).await
+        self.client.get("/").await
     }
 }

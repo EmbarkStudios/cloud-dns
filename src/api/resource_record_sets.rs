@@ -37,7 +37,7 @@ impl<'client> ResourceRecordSetsHandler<'client> {
             managed_zone = managed_zone,
         );
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn get(
@@ -53,7 +53,7 @@ impl<'client> ResourceRecordSetsHandler<'client> {
             typ = r#type,
         );
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn patch(
@@ -94,6 +94,6 @@ impl<'client> ResourceRecordSetsHandler<'client> {
             typ = r#type,
         );
 
-        self.client.delete(route, None::<&()>).await
+        self.client.delete(route).await
     }
 }

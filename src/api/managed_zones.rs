@@ -130,13 +130,13 @@ impl<'client> ManagedZonesHandler<'client> {
     pub async fn list(&self) -> Result<ManagedZones> {
         let route = "managedZones".to_string();
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn get(&self, managed_zone: String) -> Result<ManagedZone> {
         let route = format!("managedZones/{managed_zone}", managed_zone = managed_zone,);
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn patch(
@@ -160,7 +160,7 @@ impl<'client> ManagedZonesHandler<'client> {
     pub async fn delete(&self, managed_zone: &str) -> Result<()> {
         let route = format!("managedZones/{managed_zone}", managed_zone = managed_zone,);
 
-        self.client.delete(route, None::<&()>).await
+        self.client.delete(route).await
     }
 
     pub async fn update(

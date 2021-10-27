@@ -75,7 +75,7 @@ impl<'client> DnsKeysHandler<'client> {
             managed_zone = managed_zone,
         );
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn get(&self, managed_zone: &str, dns_key_id: &str) -> Result<DnsKey> {
@@ -85,6 +85,6 @@ impl<'client> DnsKeysHandler<'client> {
             dns_key_id = dns_key_id,
         );
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 }

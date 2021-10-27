@@ -1,36 +1,50 @@
 use from_response::FromResponse;
-use reqwest::Url;
+use http::{Request, Response, request};
+use hyper::Body;
 use serde::Serialize;
 use tame_oauth::{
     gcp::{TokenOrRequest, TokenProvider, TokenProviderWrapper},
     Token,
 };
+use tower::{BoxError, Layer, Service, ServiceExt, buffer::Buffer, util::BoxService};
+use tower_http::map_response_body::MapResponseBodyLayer;
+use url::Url;
 
 mod api;
+mod body;
+// Add `into_stream()` to `http::Body`
+use body::BodyStreamExt;
 mod error;
 mod from_response;
 
 pub type Result<T, E = error::DnsError> = std::result::Result<T, E>;
 
 /// The Cloud DNS API client.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DnsClient {
-    client: reqwest::Client,
-    pub base_url: Url,
+    inner: Buffer<BoxService<Request<Body>, Response<Body>, BoxError>, Request<Body>>,
+    pub base_url: url::Url,
     project_id: String,
 }
 
 impl DnsClient {
-    pub fn new(project_id: &str) -> Result<DnsClient> {
-        let client = reqwest::Client::builder()
-            .build()
-            .map_err(error::DnsError::Http)?;
+    pub fn new<S, B>(service: S, project_id: &str) -> Self 
+    where
+        S: Service<Request<Body>, Response = Response<B>> + Send + 'static,
+        S::Future: Send + 'static,
+        S::Error: Into<BoxError>,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: std::error::Error + Send + Sync + 'static,
+    {
+        let service = MapResponseBodyLayer::new(|b: B| Body::wrap_stream(b.into_stream()))
+            .layer(service)
+            .map_err(|e|e.into());
 
-        Ok(DnsClient {
-            client,
+        Self {
+            inner: Buffer::new(BoxService::new(service), 1024),
             project_id: project_id.to_string(),
-            base_url: Url::parse(&base_url(project_id)).unwrap(),
-        })
+            base_url: Url::parse(&base_url(project_id)).unwrap()
+        }
     }
 
     pub fn changes(&self) -> api::changes::ChangesHandler {
@@ -65,9 +79,9 @@ impl DnsClient {
 }
 
 impl DnsClient {
-    pub fn absolute_url(&self, url: impl AsRef<str>) -> Result<Url> {
+    pub fn absolute_url(&self, path: impl AsRef<str>) -> Result<url::Url> {
         self.base_url
-            .join(url.as_ref())
+            .join(path.as_ref())
             .map_err(error::DnsError::Url)
     }
 
@@ -76,34 +90,32 @@ impl DnsClient {
         route: impl AsRef<str>,
         body: Option<&P>,
     ) -> Result<R> {
-        let mut request = self
-            .request_builder(self.absolute_url(route)?, reqwest::Method::POST)
+        let builder = self
+            .request_builder(self.absolute_url(route)?, http::Method::POST)
             .await?;
 
-        if let Some(body) = body {
-            request = request.json(body);
-        }
+        let request = match body {
+            Some(b) => {
+                builder.body(Body::from(serde_json::to_string(b).map_err(error::DnsError::JsonTest)?))?
+            },
+            None => builder.body(Body::empty())?,
+        };
 
         let response = self.execute(request).await?;
-        R::from_response(map_dns_error(response).await?).await
+        R::from_response(response).await
     }
 
-    pub async fn get<R, A, P>(&self, route: A, parameters: Option<&P>) -> Result<R>
+    pub async fn get<R, A>(&self, route: A) -> Result<R>
     where
         A: AsRef<str>,
-        P: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self
-            .request_builder(self.absolute_url(route)?, reqwest::Method::GET)
+        let builder = self
+            .request_builder(self.absolute_url(route)?, http::Method::GET)
             .await?;
 
-        if let Some(parameters) = parameters {
-            request = request.query(parameters);
-        }
-
-        let response = self.execute(request).await?;
-        R::from_response(map_dns_error(response).await?).await
+        let response = self.execute(builder.body(Body::empty())?).await?;
+        R::from_response(response).await
     }
 
     pub async fn patch<R, A, B>(&self, route: A, body: Option<&B>) -> Result<R>
@@ -112,16 +124,19 @@ impl DnsClient {
         B: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self
-            .request_builder(self.absolute_url(route)?, reqwest::Method::PATCH)
+        let builder = self
+            .request_builder(self.absolute_url(route)?, http::Method::PATCH)
             .await?;
 
-        if let Some(body) = body {
-            request = request.json(body);
-        }
+        let request = match body {
+            Some(b) => {
+                builder.body(Body::from(serde_json::to_string(b).map_err(error::DnsError::JsonTest)?))?
+            },
+            None => builder.body(Body::empty())?,
+        };
 
         let response = self.execute(request).await?;
-        R::from_response(map_dns_error(response).await?).await
+        R::from_response(response).await
     }
 
     pub async fn put<R, A, B>(&self, route: A, body: Option<&B>) -> Result<R>
@@ -130,52 +145,58 @@ impl DnsClient {
         B: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self
-            .request_builder(self.absolute_url(route)?, reqwest::Method::PUT)
+        let builder = self
+            .request_builder(self.absolute_url(route)?, http::Method::PUT)
             .await?;
 
-        if let Some(body) = body {
-            request = request.json(body);
-        }
+        let request = match body {
+            Some(b) => {
+                builder.body(Body::from(serde_json::to_string(b).map_err(error::DnsError::JsonTest)?))?
+            },
+            None => builder.body(Body::empty())?,
+        };
 
         let response = self.execute(request).await?;
-        R::from_response(map_dns_error(response).await?).await
+        R::from_response(response).await
     }
 
-    pub async fn delete<R, A, P>(&self, route: A, parameters: Option<&P>) -> Result<R>
+    pub async fn delete<R, A>(&self, route: A) -> Result<R>
     where
         A: AsRef<str>,
-        P: Serialize + ?Sized,
         R: FromResponse,
     {
-        let mut request = self
-            .request_builder(self.absolute_url(route)?, reqwest::Method::DELETE)
+        let builder = self
+            .request_builder(self.absolute_url(route)?, http::Method::DELETE)
             .await?;
 
-        if let Some(parameters) = parameters {
-            request = request.query(parameters);
-        }
-
-        let response = self.execute(request).await?;
-        R::from_response(map_dns_error(response).await?).await
+        let response = self.execute(builder.body(Body::empty())?).await?;
+        R::from_response(response).await
     }
 
     pub async fn request_builder(
         &self,
-        url: impl reqwest::IntoUrl,
-        method: reqwest::Method,
-    ) -> Result<reqwest::RequestBuilder> {
+        url: url::Url,
+        method: http::Method,
+    ) -> Result<http::request::Builder> {
         match self.fetch_token().await {
-            Ok(token) => Ok(self
-                .client
-                .request(method, url)
-                .bearer_auth(token.access_token)),
+            Ok(token) => Ok(
+                request::Builder::new()
+                .method(method)
+                .uri(url.to_string())
+                .header(http::header::AUTHORIZATION, format!("Bearer {}", token.access_token))),
             Err(e) => Err(e),
         }
     }
 
-    pub async fn execute(&self, request: reqwest::RequestBuilder) -> Result<reqwest::Response> {
-        request.send().await.map_err(error::DnsError::Http)
+    pub async fn execute(&self, request: Request<Body>) -> Result<Response<Body>> {
+        let mut svc = self.inner.clone();
+        svc
+            .ready()
+            .await
+            .map_err(error::DnsError::Service)?
+            .call(request)
+            .await
+            .map_err(error::DnsError::Service)
     }
 }
 
@@ -191,24 +212,26 @@ impl DnsClient {
                 scope_hash,
                 ..
             } => {
-                let client = reqwest::Client::new();
-
                 let (parts, body) = request.into_parts();
-                let uri = parts.uri.to_string();
 
-                let builder = match parts.method {
-                    http::Method::POST => client.post(&uri),
-                    method => unimplemented!("{} not implemented", method),
-                };
+                let mut request_builder = request::Builder::new();
 
-                let request = builder.headers(parts.headers).body(body).build().unwrap();
-                let response = client.execute(request).await.unwrap();
+                for (key, value) in parts.headers.iter() {
+                    request_builder.headers_mut().unwrap().append(key, value.clone());
+                }
+                
+                let request = request_builder
+                .method(parts.method)
+                .uri(parts.uri.to_string()).body(Body::from(body)).unwrap();
 
-                let mut builder = http::Response::builder()
+
+                let response = self.execute(request).await.unwrap();
+
+                let mut response_builder = http::Response::builder()
                     .status(response.status())
                     .version(response.version());
 
-                let headers = builder.headers_mut().unwrap();
+                let headers = response_builder.headers_mut().unwrap();
                 headers.extend(
                     response
                         .headers()
@@ -216,25 +239,12 @@ impl DnsClient {
                         .map(|(k, v)| (k.clone(), v.clone())),
                 );
 
-                let buffer = response.bytes().await.unwrap();
-                let response = builder.body(buffer).unwrap();
-
                 provider
-                    .parse_token_response(scope_hash, response)
+                    .parse_token_response(scope_hash, response_builder.body(hyper::body::to_bytes(response.into_body()).await?)?)
                     .map_err(error::DnsError::Auth)
             }
             _ => unreachable!(),
         }
-    }
-}
-
-pub async fn map_dns_error(response: reqwest::Response) -> Result<reqwest::Response> {
-    if response.status().is_success() {
-        Ok(response)
-    } else {
-        Err(error::DnsError::Http(
-            response.error_for_status().unwrap_err(),
-        ))
     }
 }
 

@@ -54,7 +54,7 @@ impl<'client> ManagedZoneOperationsHandler<'client> {
             managed_zone = managed_zone,
         );
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn get(
@@ -68,6 +68,6 @@ impl<'client> ManagedZoneOperationsHandler<'client> {
             operation_id = operation_id,
         );
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 }

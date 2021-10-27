@@ -43,13 +43,13 @@ impl<'client> ChangesHandler<'client> {
     pub async fn list(&self, managed_zone: &str) -> Result<Changes> {
         let route = format!("managedZones/{}/changes", managed_zone);
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn get(&self, managed_zone: &str, change_id: &str) -> Result<Change> {
         let route = format!("managedZones/{}/changes/{}", managed_zone, change_id);
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn create(&self, managed_zone: &str, change: Change) -> Result<Change> {

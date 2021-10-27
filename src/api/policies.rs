@@ -67,13 +67,13 @@ impl<'client> PoliciesHandler<'client> {
     pub async fn list(&self) -> Result<Policies> {
         let route = "policies".to_string();
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn get(&self, policy: &str) -> Result<Policy> {
         let route = format!("policies/{policy}", policy = policy,);
 
-        self.client.get(route, None::<&()>).await
+        self.client.get(route).await
     }
 
     pub async fn patch(&self, policy_id: &str, policy: Policy) -> Result<Policy> {
@@ -91,7 +91,7 @@ impl<'client> PoliciesHandler<'client> {
     pub async fn delete(&self, policy_id: &str) -> Result<()> {
         let route = format!("policies/{policy_id}", policy_id = policy_id,);
 
-        self.client.delete(route, None::<&()>).await
+        self.client.delete(route).await
     }
 
     pub async fn update(&self, policy_id: &str, policy: Policy) -> Result<UpdatePolicy> {
