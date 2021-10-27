@@ -1,0 +1,31 @@
+[package]
+name = "cloud-dns"
+version = "0.10.0"
+authors = [
+    "embark-studios",
+]
+description = "A set client library to interact with Cloud DNS"
+readme = "README.md"
+repository = "https://github.com/EmbarkStudios/cloud-dns"
+edition = "2018"
+
+[dependencies]
+serde = {version = "1.0.130", features = ["derive"]}
+serde_json = "1.0.68"
+thiserror = "1.0.30"
+async-trait = "0.1.50"
+url = "2.2.2"
+serde_path_to_error = "0.1.4"
+tame-oauth = "0.6.0"
+http = "0.2.5"
+tower = { version = "0.4.10", features = ["buffer", "util"]}
+tower-http = { version = "0.1.1", features = ["map-response-body"]}
+hyper = { version = "0.14.13", features = ["full"]}
+http-body = "0.4.3"
+bytes = "1.1.0"
+pin-project = "1.0.8"
+futures = "0.3.17"
+
+[dev-dependencies]
+tokio = { version = "1.12.0", default-features = false, features = ["macros", "rt-multi-thread", "time"] }
+hyper-rustls = { version = "0.22.1"}
