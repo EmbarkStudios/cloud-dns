@@ -20,7 +20,7 @@ tame-oauth = "0.6.0"
 http = "0.2.5"
 tower = { version = "0.4.10", features = ["buffer", "util"]}
 tower-http = { version = "0.1.1", features = ["map-response-body"]}
-hyper = { version = "0.14.13", features = ["stream"]}
+hyper = { version = "0.14.13", features = ["full"]}
 http-body = "0.4.3"
 bytes = "1.1.0"
 pin-project = "1.0.8"
@@ -29,4 +29,6 @@ futures = "0.3.17"
 [dev-dependencies]
 tokio = { version = "1.12.0", default-features = false, features = ["macros", "rt-multi-thread", "time"] }
 hyper = { version = "0.14.13", features = ["stream", "client", "http1", "tcp"]}
-hyper-tls = "0.5.0"
+hyper-rustls = { version = "0.22.1", features = ["webpki-roots"]}
+webpki-roots = { version = "0.21" }
+rustls = { version = "0.19" }
