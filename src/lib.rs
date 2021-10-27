@@ -1,12 +1,12 @@
 use from_response::FromResponse;
-use http::{Request, Response, request};
+use http::{request, Request, Response};
 use hyper::Body;
 use serde::Serialize;
 use tame_oauth::{
     gcp::{TokenOrRequest, TokenProvider, TokenProviderWrapper},
     Token,
 };
-use tower::{BoxError, Layer, Service, ServiceExt, buffer::Buffer, util::BoxService};
+use tower::{buffer::Buffer, util::BoxService, BoxError, Layer, Service, ServiceExt};
 use tower_http::map_response_body::MapResponseBodyLayer;
 use url::Url;
 
@@ -28,7 +28,7 @@ pub struct DnsClient {
 }
 
 impl DnsClient {
-    pub fn new<S, B>(service: S, project_id: &str) -> Self 
+    pub fn new<S, B>(service: S, project_id: &str) -> Self
     where
         S: Service<Request<Body>, Response = Response<B>> + Send + 'static,
         S::Future: Send + 'static,
@@ -38,12 +38,12 @@ impl DnsClient {
     {
         let service = MapResponseBodyLayer::new(|b: B| Body::wrap_stream(b.into_stream()))
             .layer(service)
-            .map_err(|e|e.into());
+            .map_err(|e| e.into());
 
         Self {
             inner: Buffer::new(BoxService::new(service), 1024),
             project_id: project_id.to_string(),
-            base_url: Url::parse(&base_url(project_id)).unwrap()
+            base_url: Url::parse(&base_url(project_id)).unwrap(),
         }
     }
 
@@ -95,9 +95,9 @@ impl DnsClient {
             .await?;
 
         let request = match body {
-            Some(b) => {
-                builder.body(Body::from(serde_json::to_string(b).map_err(error::DnsError::JsonTest)?))?
-            },
+            Some(b) => builder.body(Body::from(
+                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+            ))?,
             None => builder.body(Body::empty())?,
         };
 
@@ -129,9 +129,9 @@ impl DnsClient {
             .await?;
 
         let request = match body {
-            Some(b) => {
-                builder.body(Body::from(serde_json::to_string(b).map_err(error::DnsError::JsonTest)?))?
-            },
+            Some(b) => builder.body(Body::from(
+                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+            ))?,
             None => builder.body(Body::empty())?,
         };
 
@@ -150,9 +150,9 @@ impl DnsClient {
             .await?;
 
         let request = match body {
-            Some(b) => {
-                builder.body(Body::from(serde_json::to_string(b).map_err(error::DnsError::JsonTest)?))?
-            },
+            Some(b) => builder.body(Body::from(
+                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+            ))?,
             None => builder.body(Body::empty())?,
         };
 
@@ -179,19 +179,20 @@ impl DnsClient {
         method: http::Method,
     ) -> Result<http::request::Builder> {
         match self.fetch_token().await {
-            Ok(token) => Ok(
-                request::Builder::new()
+            Ok(token) => Ok(request::Builder::new()
                 .method(method)
                 .uri(url.to_string())
-                .header(http::header::AUTHORIZATION, format!("Bearer {}", token.access_token))),
+                .header(
+                    http::header::AUTHORIZATION,
+                    format!("Bearer {}", token.access_token),
+                )),
             Err(e) => Err(e),
         }
     }
 
     pub async fn execute(&self, request: Request<Body>) -> Result<Response<Body>> {
         let mut svc = self.inner.clone();
-        svc
-            .ready()
+        svc.ready()
             .await
             .map_err(error::DnsError::Service)?
             .call(request)
@@ -217,13 +218,17 @@ impl DnsClient {
                 let mut request_builder = request::Builder::new();
 
                 for (key, value) in parts.headers.iter() {
-                    request_builder.headers_mut().unwrap().append(key, value.clone());
+                    request_builder
+                        .headers_mut()
+                        .unwrap()
+                        .append(key, value.clone());
                 }
-                
-                let request = request_builder
-                .method(parts.method)
-                .uri(parts.uri.to_string()).body(Body::from(body)).unwrap();
 
+                let request = request_builder
+                    .method(parts.method)
+                    .uri(parts.uri.to_string())
+                    .body(Body::from(body))
+                    .unwrap();
 
                 let response = self.execute(request).await.unwrap();
 
@@ -240,7 +245,11 @@ impl DnsClient {
                 );
 
                 provider
-                    .parse_token_response(scope_hash, response_builder.body(hyper::body::to_bytes(response.into_body()).await?)?)
+                    .parse_token_response(
+                        scope_hash,
+                        response_builder
+                            .body(hyper::body::to_bytes(response.into_body()).await?)?,
+                    )
                     .map_err(error::DnsError::Auth)
             }
             _ => unreachable!(),
