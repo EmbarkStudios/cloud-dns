@@ -14,8 +14,8 @@
 [![Embark](https://img.shields.io/badge/discord-ark-%237289da.svg?logo=discord)](https://discord.gg/dAuKfZS)
 [![Crates.io](https://img.shields.io/crates/v/rust-gpu.svg)](https://crates.io/crates/cloud-dns)
 [![Docs](https://docs.rs/cloud-dns/badge.svg)](https://docs.rs/cloud-dns)
-[![dependency status](https://deps.rs/repo/github/EmbarkStudios/v/status.svg)](https://deps.rs/repo/github/EmbarkStudios/v)
-[![Build status](https://github.com/EmbarkStudios/v/workflows/CI/badge.svg)](https://github.com/EmbarkStudios/cloud-dns/actions)
+[![dependency status](https://deps.rs/repo/github/EmbarkStudios/cloud-dns/status.svg)](https://deps.rs/repo/github/EmbarkStudios/v)
+[![Build status](https://github.com/EmbarkStudios/cloud-dns/workflows/CI/badge.svg)](https://github.com/EmbarkStudios/cloud-dns/actions)
 </div>
 
 ## Contribution
