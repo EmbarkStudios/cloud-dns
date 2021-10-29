@@ -96,7 +96,7 @@ impl DnsClient {
 
         let request = match body {
             Some(b) => builder.body(Body::from(
-                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+                serde_json::to_string(b).map_err(error::DnsError::JsonWithoutPath)?,
             ))?,
             None => builder.body(Body::empty())?,
         };
@@ -130,7 +130,7 @@ impl DnsClient {
 
         let request = match body {
             Some(b) => builder.body(Body::from(
-                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+                serde_json::to_string(b).map_err(error::DnsError::JsonWithoutPath)?,
             ))?,
             None => builder.body(Body::empty())?,
         };
@@ -151,7 +151,7 @@ impl DnsClient {
 
         let request = match body {
             Some(b) => builder.body(Body::from(
-                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+                serde_json::to_string(b).map_err(error::DnsError::JsonWithoutPath)?,
             ))?,
             None => builder.body(Body::empty())?,
         };
