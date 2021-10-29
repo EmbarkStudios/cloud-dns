@@ -10,20 +10,20 @@ pub mod resource_record_sets;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct ListEnvelope {
-    kind: String,
-    header: Option<Header>,
-    next_page_token: Option<String>,
+pub struct ListEnvelope {
+    pub kind: String,
+    pub header: Option<Header>,
+    pub next_page_token: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct UpdateEnvelope {
-    header: Option<Header>,
+pub struct UpdateEnvelope {
+    pub header: Option<Header>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct Header {
-    operation_id: String,
+pub struct Header {
+    pub operation_id: String,
 }

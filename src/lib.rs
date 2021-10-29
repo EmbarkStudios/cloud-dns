@@ -10,7 +10,7 @@ use tower::{buffer::Buffer, util::BoxService, BoxError, Layer, Service, ServiceE
 use tower_http::map_response_body::MapResponseBodyLayer;
 use url::Url;
 
-mod api;
+pub mod api;
 mod body;
 // Add `into_stream()` to `http::Body`
 use body::BodyStreamExt;

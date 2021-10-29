@@ -7,52 +7,52 @@ use super::{ListEnvelope, UpdateEnvelope};
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Policy {
-    kind: String, // "dns#policy"
-    id: u64,
-    name: String,
-    enable_inbound_forwarding: bool,
-    description: String,
-    networks: PolicyNetwork,
-    alternative_name_server_config: AlternativeNameServerConfig,
-    enable_logging: bool,
+    pub kind: String, // "dns#policy"
+    pub id: u64,
+    pub name: String,
+    pub enable_inbound_forwarding: bool,
+    pub description: String,
+    pub networks: PolicyNetwork,
+    pub alternative_name_server_config: AlternativeNameServerConfig,
+    pub enable_logging: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct PolicyNetwork {
-    kind: String, // "dns#policyNetwork"
-    network_url: String,
+pub struct PolicyNetwork {
+    pub kind: String, // "dns#policyNetwork"
+    pub network_url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct AlternativeNameServerConfig {
-    kind: String, // "dns#policyAlternativeNameServerConfig"
-    target_name_servers: Vec<AlternativeNameServerConfigTargetNameServers>,
+pub struct AlternativeNameServerConfig {
+    pub kind: String, // "dns#policyAlternativeNameServerConfig"
+    pub target_name_servers: Vec<AlternativeNameServerConfigTargetNameServers>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct AlternativeNameServerConfigTargetNameServers {
-    kind: String, // "dns#policyAlternativeNameServerConfigTargetNameServer"
-    ipv4_address: String,
-    forwarding_path: String,
+pub struct AlternativeNameServerConfigTargetNameServers {
+    pub kind: String, // "dns#policyAlternativeNameServerConfigTargetNameServer"
+    pub ipv4_address: String,
+    pub forwarding_path: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Policies {
     #[serde(flatten)]
-    envelope: ListEnvelope,
-    policies: Vec<Policy>,
+    pub envelope: ListEnvelope,
+    pub policies: Vec<Policy>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdatePolicy {
     #[serde(flatten)]
-    envelope: UpdateEnvelope,
-    policy: Policy,
+    pub envelope: UpdateEnvelope,
+    pub policy: Policy,
 }
 
 pub struct PoliciesHandler<'client> {

@@ -7,19 +7,19 @@ use super::ListEnvelope;
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceRecordSet {
-    kind: String, // "dns#resourceRecordSet"
-    name: String,
-    r#type: String,
-    ttl: i32,
-    rrdatas: Vec<String>,
-    signature_rrdatas: Vec<String>,
+    pub kind: String, // "dns#resourceRecordSet"
+    pub name: String,
+    pub r#type: String,
+    pub ttl: i32,
+    pub rrdatas: Vec<String>,
+    pub signature_rrdatas: Vec<String>,
 }
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceRecordSets {
     #[serde(flatten)]
-    envelope: ListEnvelope,
-    rrsets: Vec<ResourceRecordSet>,
+    pub envelope: ListEnvelope,
+    pub rrsets: Vec<ResourceRecordSet>,
 }
 
 pub struct ResourceRecordSetsHandler<'client> {
