@@ -11,7 +11,7 @@ pub enum DnsError {
     #[error(transparent)]
     Json(#[from] serde_path_to_error::Error<serde_json::Error>),
     #[error(transparent)]
-    JsonTest(#[from] serde_json::Error),
+    JsonWithoutPath(#[from] serde_json::Error),
     #[error(transparent)]
     Url(#[from] url::ParseError),
     #[error(transparent)]
