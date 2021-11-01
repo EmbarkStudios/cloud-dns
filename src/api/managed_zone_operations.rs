@@ -7,36 +7,36 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ManagedZoneOperation {
-    kind: String, // "dns#operation"
-    id: String,
-    start_time: String,
-    status: String,
-    user: String,
-    r#type: String,
-    zone_context: ZoneContext,
-    dns_key_context: DnsKeyContext,
+    pub kind: String, // "dns#operation"
+    pub id: String,
+    pub start_time: String,
+    pub status: String,
+    pub user: String,
+    pub r#type: String,
+    pub zone_context: ZoneContext,
+    pub dns_key_context: DnsKeyContext,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct ZoneContext {
-    old_value: ManagedZone,
-    new_value: ManagedZone,
+pub struct ZoneContext {
+    pub old_value: ManagedZone,
+    pub new_value: ManagedZone,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct DnsKeyContext {
-    old_value: DnsKey,
-    new_value: DnsKey,
+pub struct DnsKeyContext {
+    pub old_value: DnsKey,
+    pub new_value: DnsKey,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ManagedZoneOperations {
     #[serde(flatten)]
-    envelope: ListEnvelope,
-    operations: Vec<ManagedZoneOperation>,
+    pub envelope: ListEnvelope,
+    pub operations: Vec<ManagedZoneOperation>,
 }
 
 pub struct ManagedZoneOperationsHandler<'client> {

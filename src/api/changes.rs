@@ -7,18 +7,18 @@ use super::{resource_record_sets::ResourceRecordSet, ListEnvelope};
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Change {
-    kind: String, // "dns#change"
-    additions: Vec<ResourceRecordSet>,
-    deletions: Vec<ResourceRecordSet>,
-    start_time: String,
-    id: String,
-    status: Status,
-    is_serving: Option<bool>,
+    pub kind: String, // "dns#change"
+    pub additions: Vec<ResourceRecordSet>,
+    pub deletions: Vec<ResourceRecordSet>,
+    pub start_time: String,
+    pub id: String,
+    pub status: Status,
+    pub is_serving: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-enum Status {
+pub enum Status {
     Done,
     Pending,
 }
@@ -27,8 +27,8 @@ enum Status {
 #[serde(rename_all = "camelCase")]
 pub struct Changes {
     #[serde(flatten)]
-    envelope: ListEnvelope,
-    changes: Vec<Change>,
+    pub envelope: ListEnvelope,
+    pub changes: Vec<Change>,
 }
 
 pub struct ChangesHandler<'client> {

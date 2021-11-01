@@ -10,7 +10,7 @@ use tower::{buffer::Buffer, util::BoxService, BoxError, Layer, Service, ServiceE
 use tower_http::map_response_body::MapResponseBodyLayer;
 use url::Url;
 
-mod api;
+pub mod api;
 mod body;
 // Add `into_stream()` to `http::Body`
 use body::BodyStreamExt;
@@ -96,7 +96,7 @@ impl DnsClient {
 
         let request = match body {
             Some(b) => builder.body(Body::from(
-                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+                serde_json::to_string(b).map_err(error::DnsError::JsonWithoutPath)?,
             ))?,
             None => builder.body(Body::empty())?,
         };
@@ -130,7 +130,7 @@ impl DnsClient {
 
         let request = match body {
             Some(b) => builder.body(Body::from(
-                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+                serde_json::to_string(b).map_err(error::DnsError::JsonWithoutPath)?,
             ))?,
             None => builder.body(Body::empty())?,
         };
@@ -151,7 +151,7 @@ impl DnsClient {
 
         let request = match body {
             Some(b) => builder.body(Body::from(
-                serde_json::to_string(b).map_err(error::DnsError::JsonTest)?,
+                serde_json::to_string(b).map_err(error::DnsError::JsonWithoutPath)?,
             ))?,
             None => builder.body(Body::empty())?,
         };
