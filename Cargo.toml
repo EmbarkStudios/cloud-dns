@@ -2,10 +2,11 @@
 name = "cloud-dns"
 version = "0.10.0"
 authors = [
-    "embark-studios",
+    "Embark <opensource@embark-studios.com>",
 ]
 description = "A set client library to interact with Cloud DNS"
 readme = "README.md"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/EmbarkStudios/cloud-dns"
 edition = "2018"
 
