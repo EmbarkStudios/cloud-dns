@@ -34,7 +34,7 @@ impl DnsClient {
         S::Future: Send + 'static,
         S::Error: Into<BoxError>,
         B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
-        B::Error: std::error::Error + Send + Sync + 'static,
+        B::Error: Into<BoxError>,
     {
         let service = MapResponseBodyLayer::new(|b: B| Body::wrap_stream(b.into_stream()))
             .layer(service)
