@@ -23,7 +23,7 @@ tower-http = { version = "0.1.1", features = ["map-response-body"]}
 hyper = { version = "0.14.13", features = ["full"]}
 http-body = "0.4.3"
 bytes = "1.1.0"
-pin-project = "1.0.8"
+pin-project-lite = "0.2.7"
 futures = "0.3.17"
 
 [dev-dependencies]

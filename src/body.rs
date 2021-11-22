@@ -1,17 +1,16 @@
-use std::{
-    pin::Pin,
-    task::{Context, Poll},
-};
+use std::{task::{Context, Poll}};
 
 use futures::stream::Stream;
 use http_body::Body;
-use pin_project::pin_project;
+use pin_project_lite::pin_project;
+use std::pin::Pin;
 
 // Wrap `http_body::Body` to implement `Stream`.
-#[pin_project]
-pub struct IntoStream<B> {
-    #[pin]
-    body: B,
+pin_project! {
+    pub struct IntoStream<B> {
+        #[pin]
+        body: B,
+    }
 }
 
 impl<B> IntoStream<B> {
