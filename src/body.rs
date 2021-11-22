@@ -1,4 +1,4 @@
-use std::{task::{Context, Poll}};
+use std::task::{Context, Poll};
 
 use futures::stream::Stream;
 use http_body::Body;
