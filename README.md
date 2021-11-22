@@ -8,7 +8,7 @@
 
 # `📒 cloud-dns`
 
-**`cloud-dns` is a crate providing a client to interact with [Google Cloud DNS](https://cloud.google.com/dns)**
+**`cloud-dns` is a crate providing a client to interact with [Google Cloud DNS v1](https://cloud.google.com/dns)**
     
 [![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](https://embark.dev)
 [![Embark](https://img.shields.io/badge/discord-ark-%237289da.svg?logo=discord)](https://discord.gg/dAuKfZS)
@@ -17,6 +17,29 @@
 [![dependency status](https://deps.rs/repo/github/EmbarkStudios/cloud-dns/status.svg)](https://deps.rs/repo/github/EmbarkStudios/cloud-dns)
 [![Build status](https://github.com/EmbarkStudios/cloud-dns/workflows/CI/badge.svg)](https://github.com/EmbarkStudios/cloud-dns/actions)
 </div>
+
+## Example
+
+```rust
+#[tokio::main]
+async fn main() -> cloud_dns::Result<()> {
+    let project_id = std::env::var("PROJECT_ID").expect("PROJECT_ID env variable is required");
+    let managed_zone =
+        std::env::var("MANAGED_ZONE").expect("MANAGED_ZONE env variable is required");
+
+    let service = tower::ServiceBuilder::new()
+        .service(hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()));
+
+    let response = cloud_dns::DnsClient::new(service, project_id.as_str())
+        .changes()
+        .list(managed_zone.as_str())
+        .await?;
+
+    println!("{:#?}", response);
+
+    Ok(())
+}
+```
 
 ## Contribution
 
