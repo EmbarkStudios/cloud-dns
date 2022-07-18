@@ -24,7 +24,6 @@ pub type Result<T, E = error::DnsError> = std::result::Result<T, E>;
 pub struct DnsClient {
     inner: Buffer<BoxService<Request<Body>, Response<Body>, BoxError>, Request<Body>>,
     pub base_url: url::Url,
-    project_id: String,
 }
 
 impl DnsClient {
@@ -40,10 +39,12 @@ impl DnsClient {
             .layer(service)
             .map_err(|e| e.into());
 
+        let mut base_url = Url::parse("https://dns.googleapis.com").unwrap();
+        base_url.set_path(&format!("dns/v1/projects/{project_id}/"));
+
         Self {
             inner: Buffer::new(BoxService::new(service), 1024),
-            project_id: project_id.to_string(),
-            base_url: Url::parse(&base_url(project_id)).unwrap(),
+            base_url,
         }
     }
 
@@ -207,7 +208,10 @@ impl DnsClient {
             .expect("unable to read default token provider")
             .expect("unable to find default token provider");
 
-        match provider.get_token(scopes()).unwrap() {
+        match provider
+            .get_token(&["https://www.googleapis.com/auth/ndev.clouddns.readwrite"])
+            .unwrap()
+        {
             TokenOrRequest::Request {
                 request,
                 scope_hash,
@@ -255,12 +259,4 @@ impl DnsClient {
             _ => unreachable!(),
         }
     }
-}
-
-fn base_url(project_id: &str) -> String {
-    format!("https://dns.googleapis.com/dns/v1/projects/{}/", project_id)
-}
-
-fn scopes() -> &'static [&'static str] {
-    &["https://www.googleapis.com/auth/ndev.clouddns.readwrite"]
 }
